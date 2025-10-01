@@ -1,0 +1,12 @@
+# Example regions file for remove_genomic_regions.py
+# Format: region_name    start_position    end_position
+# Lines starting with # are comments
+# Coordinates are 1-based and inclusive
+# Positions refer to the ORIGINAL genome sequence
+
+# Example regions to remove from Ntab_nuclear.fna
+# Replace these with your actual regions of interest
+
+Region1	1000	2000
+Region2	5000	5500
+Region3	10000	10500
