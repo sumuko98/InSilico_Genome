@@ -1,0 +1,21 @@
+# Ignore test artifacts and temporary files
+*.pyc
+__pycache__/
+.DS_Store
+.pytest_cache/
+
+# Ignore genome files (they are usually large)
+*.fna
+*.fasta
+*.fa
+
+# Keep example regions file but ignore actual working regions files
+regions_to_remove.txt
+
+# Ignore output files
+*_modified.fna
+*_removed_regions.txt
+
+# Ignore temporary directories
+/tmp/
+*.tmp
