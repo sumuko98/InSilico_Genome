@@ -23,17 +23,18 @@ from datetime import datetime
 class GenomicRegion:
     """Class to represent a genomic region to be removed."""
     
-    def __init__(self, name: str, start: int, end: int, original_start: int, original_end: int):
+    def __init__(self, name: str, start: int, end: int, original_start: int, original_end: int, shifted_start: int):
         self.name = name
         self.start = start  # Current position (adjusted)
         self.end = end      # Current position (adjusted)
         self.original_start = original_start  # Original position
         self.original_end = original_end      # Original position
+        self.shifted_start = shifted_start  # Start position in progressively modified sequence
         self.length = end - start + 1
         
     def __repr__(self):
         return (f"GenomicRegion(name={self.name}, original=[{self.original_start},{self.original_end}], "
-                f"adjusted=[{self.start},{self.end}], length={self.length})")
+                f"adjusted=[{self.start},{self.end}], shifted_start={self.shifted_start}, length={self.length})")
 
 
 def read_fasta(fasta_file: str) -> Tuple[str, str]:
@@ -171,12 +172,16 @@ def remove_regions(sequence: str, regions_list: List[Tuple[str, int, int]]) -> T
         start_idx = orig_start - 1
         end_idx = orig_end  # end is inclusive in 1-based, becomes exclusive in 0-based
         
+        # Calculate shifted start: where this region would start in the progressively modified sequence
+        # This is the original start minus the total length of all previously removed regions
+        shifted_start = orig_start - cumulative_offset
+        
         # Calculate adjusted coordinates (accounting for previous removals)
-        adjusted_start = orig_start - cumulative_offset
+        adjusted_start = shifted_start  # Same as shifted_start
         adjusted_end = orig_end - cumulative_offset
         
         # Store region information
-        region = GenomicRegion(name, adjusted_start, adjusted_end, orig_start, orig_end)
+        region = GenomicRegion(name, adjusted_start, adjusted_end, orig_start, orig_end, shifted_start)
         removed_regions.append(region)
         
         # Remove the region
@@ -210,16 +215,18 @@ def write_removal_report(output_file: str, regions: List[GenomicRegion],
         f.write("\n")
         
         f.write("Removed Regions (coordinates are 1-based, inclusive):\n")
-        f.write("-" * 80 + "\n")
-        f.write(f"{'Region Name':<20} {'Original Start':<15} {'Original End':<15} {'Length (bp)':<12}\n")
-        f.write("-" * 80 + "\n")
+        f.write("-" * 95 + "\n")
+        f.write(f"{'Region Name':<20} {'Original Start':<15} {'Original End':<15} {'Shifted Start':<15} {'Length (bp)':<12}\n")
+        f.write("-" * 95 + "\n")
         
         for region in regions:
             f.write(f"{region.name:<20} {region.original_start:<15,} {region.original_end:<15,} "
-                   f"{region.length:<12,}\n")
+                   f"{region.shifted_start:<15,} {region.length:<12,}\n")
         
         f.write("\n")
         f.write("Note: All coordinates refer to positions in the ORIGINAL sequence.\n")
+        f.write("      'Shifted Start' shows where each region would start in the progressively\n")
+        f.write("      modified sequence (accounting for cumulative effect of prior deletions).\n")
         f.write("      Regions are removed in order from start to end of the genome.\n")
 
 
