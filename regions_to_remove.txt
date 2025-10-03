@@ -1,0 +1,9 @@
+>NC_134080.1
+Region1    10    20
+Region2    50    60
+Region3    75    82
+
+>NC_134081.1
+RegionX    5     25
+
+>NC_134082.1
