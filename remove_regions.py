@@ -85,7 +85,7 @@ def parse_regions_file(regions_file: str) -> Dict[str, List[Tuple[str, int, int]
     return regions
 
 
-def remove_regions(sequence: str, regions: List[Tuple[str, int, int]]) -> Tuple[str, List[Tuple[str, int, int, int]]]:
+def remove_regions(sequence: str, regions: List[Tuple[str, int, int]]) -> Tuple[str, List[Tuple[str, int, int, int, int]]]:
     """
     Remove specified regions from a sequence.
     
@@ -95,7 +95,7 @@ def remove_regions(sequence: str, regions: List[Tuple[str, int, int]]) -> Tuple[
         
     Returns:
         Tuple of (modified_sequence, removed_regions_report)
-        where removed_regions_report contains (region_name, original_start, original_end, length)
+        where removed_regions_report contains (region_name, original_start, original_end, length, shifted_start)
     """
     # Sort regions by start position
     sorted_regions = sorted(regions, key=lambda x: x[1])
@@ -104,6 +104,7 @@ def remove_regions(sequence: str, regions: List[Tuple[str, int, int]]) -> Tuple[
     result_parts = []
     last_pos = 0  # 0-based index
     removed_report = []
+    cumulative_removed_length = 0
     
     for region_name, start, end in sorted_regions:
         # Convert to 0-based indexing
@@ -114,9 +115,15 @@ def remove_regions(sequence: str, regions: List[Tuple[str, int, int]]) -> Tuple[
         if start_idx > last_pos:
             result_parts.append(sequence[last_pos:start_idx])
         
+        # Calculate shifted start site (where this region would start in the modified sequence)
+        shifted_start = start - cumulative_removed_length
+        
         # Record removed region
         region_length = end - start + 1
-        removed_report.append((region_name, start, end, region_length))
+        removed_report.append((region_name, start, end, region_length, shifted_start))
+        
+        # Update cumulative removed length
+        cumulative_removed_length += region_length
         
         # Update position
         last_pos = end_idx
@@ -148,7 +155,7 @@ def write_fasta(output_file: str, sequences: Dict[str, Tuple[str, str]], line_wi
                 f.write(sequence[i:i+line_width] + '\n')
 
 
-def write_report(report_file: str, removed_regions: Dict[str, List[Tuple[str, int, int, int]]]):
+def write_report(report_file: str, removed_regions: Dict[str, List[Tuple[str, int, int, int, int]]]):
     """
     Write a report of removed regions.
     
@@ -158,18 +165,18 @@ def write_report(report_file: str, removed_regions: Dict[str, List[Tuple[str, in
     """
     with open(report_file, 'w') as f:
         f.write("Removed Regions Report\n")
-        f.write("=" * 80 + "\n\n")
+        f.write("=" * 100 + "\n\n")
         
         for chrom_id in sorted(removed_regions.keys()):
             regions = removed_regions[chrom_id]
             if regions:
                 f.write(f"Chromosome: {chrom_id}\n")
-                f.write("-" * 80 + "\n")
-                f.write(f"{'Region Name':<20} {'Start':<10} {'End':<10} {'Length':<10}\n")
-                f.write("-" * 80 + "\n")
+                f.write("-" * 100 + "\n")
+                f.write(f"{'Region Name':<20} {'Start':<10} {'End':<10} {'Length':<10} {'Shifted Start':<15}\n")
+                f.write("-" * 100 + "\n")
                 
-                for region_name, start, end, length in regions:
-                    f.write(f"{region_name:<20} {start:<10} {end:<10} {length:<10}\n")
+                for region_name, start, end, length, shifted_start in regions:
+                    f.write(f"{region_name:<20} {start:<10} {end:<10} {length:<10} {shifted_start:<15}\n")
                 
                 f.write(f"\nTotal regions removed: {len(regions)}\n")
                 f.write("\n")
