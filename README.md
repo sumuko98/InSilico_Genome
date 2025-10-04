@@ -6,7 +6,8 @@ A tool for processing multi-chromosome FASTA files by removing specified genomic
 
 - Process multi-FASTA files with multiple chromosomes
 - Remove specific regions from each chromosome based on coordinates
-- Generate detailed reports of removed regions
+- Generate detailed reports of removed regions with coordinate transformation tracking
+- Track "Shifted Start" positions to help map coordinates between original and modified sequences
 - Preserve original chromosome headers
 - Handle chromosomes with no regions to remove
 
@@ -70,9 +71,12 @@ The output FASTA file contains all chromosomes with specified regions removed. T
 
 The report file contains:
 - List of all removed regions for each chromosome
-- Start and end coordinates (1-based)
+- Start and end coordinates (1-based, original sequence coordinates)
 - Length of each removed region
+- **Shifted Start**: The position where each region would start in the modified sequence (useful for coordinate transformation)
 - Total count of removed regions per chromosome
+
+The "Shifted Start" column helps track coordinate transformations. For example, if Region1 (positions 10-20) is removed, a subsequent Region2 starting at position 50 in the original sequence would have a shifted start of 39 in the modified sequence (50 - 11 bp removed = 39).
 
 ## Sample Files
 
