@@ -176,28 +176,24 @@ def analyze_junction_reads(bam_file: str, chrom: str, j_mod: int, out_fasta: Opt
         if rstart is None or rend is None:
             continue
         
-        # Convert to 1-based for comparison with J_MOD
-        rstart_1based = rstart + 1
-        rend_1based = rend  # This is already the 1-based position of the last aligned base + 1
-        
         # Check if read is at the junction:
-        # - rstart ≤ J_MOD ≤ rend (overlaps the base J_MOD)
-        # - rend == J_MOD - 1 (stops immediately before the junction)
-        # - rstart == J_MOD (starts at the junction)
-        
-        # Note: rend is exclusive in 0-based, so rend in 0-based == last_base + 1 in 1-based
-        # So rend (0-based) corresponds to position rend (1-based) as the position after the last aligned base
+        # For J_MOD in 1-based coordinates, we check:
+        # - Overlaps J_MOD: rstart (0-based) < j_mod (1-based) <= rend (0-based)
+        #   This means the read covers the base at position j_mod (1-based)
+        # - Stops immediately before junction: rend (0-based) == j_mod - 1 (1-based)
+        #   This means last aligned base is at j_mod - 1 (1-based)
+        # - Starts at the junction: rstart (0-based) + 1 == j_mod (1-based)
         
         at_junction = False
         
-        # Overlaps J_MOD
-        if rstart_1based <= j_mod < rend_1based:
+        # Overlaps J_MOD (read covers position j_mod in 1-based coords)
+        if rstart < j_mod - 1 and rend > j_mod - 1:
             at_junction = True
-        # Stops immediately before junction (last aligned base is at J_MOD - 1)
-        elif rend_1based == j_mod:
+        # Stops immediately before junction (last aligned base is at j_mod - 1)
+        elif rend == j_mod - 1:
             at_junction = True
         # Starts at the junction
-        elif rstart_1based == j_mod:
+        elif rstart + 1 == j_mod:
             at_junction = True
         
         if at_junction:

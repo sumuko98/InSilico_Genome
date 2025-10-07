@@ -1,0 +1,2 @@
+# Required for junction_reads.py
+pysam>=0.20.0
