@@ -8,3 +8,12 @@ __pycache__/
 # Output files
 output_modified.fasta
 removed_regions_report.txt
+test_output.fasta
+test_report.txt
+
+# Junction analyzer outputs
+*.sam
+*.bam
+*.bai
+junctions_output.tsv
+test_reads.fasta
