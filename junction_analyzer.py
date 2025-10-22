@@ -118,7 +118,7 @@ def extract_softclip_sequence(read_seq: str, left_clip: int, right_clip: int) ->
         left_seq = read_seq[:left_clip]
     
     if right_clip > 0 and len(read_seq) >= right_clip:
-        right_seq = read_seq[-right_clip:]
+        right_seq = read_seq[len(read_seq) - right_clip:]
     
     return left_seq, right_seq
 
