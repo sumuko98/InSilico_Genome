@@ -285,7 +285,8 @@ def map_reads_with_mappy(reads_file: str, reference_file: str, output_sam: str, 
         sam_out.write("@HD\tVN:1.0\tSO:unsorted\n")
         
         # Write reference sequences
-        for name, length in zip(aligner.seq_names, aligner.seq_lens):
+        for name in aligner.seq_names:
+            length = len(aligner.seq(name))
             sam_out.write(f"@SQ\tSN:{name}\tLN:{length}\n")
         
         # Process reads
