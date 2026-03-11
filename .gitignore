@@ -8,3 +8,9 @@ __pycache__/
 # Output files
 output_modified.fasta
 removed_regions_report.txt
+
+# Node / React (cv-editor)
+node_modules/
+dist/
+.DS_Store
+*.local
